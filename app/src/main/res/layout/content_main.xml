@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    app:layout_behavior="@string/appbar_scrolling_view_behavior"
+    tools:context="com.bvbv.dogtraining.MainActivity"
+    tools:showIn="@layout/activity_main">
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_alignParentTop="true"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_alignTop="@+id/t_dog_training"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        >
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="61dp"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:text="@string/dog_training"
+            android:textSize="30dp"
+            android:textStyle="bold"
+            android:textColor="#E74C3C"
+            android:id="@+id/t_dog_training"
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true"
+            android:layout_gravity="center_horizontal" />
+
+        <android.support.v7.widget.CardView
+            xmlns:card_view="http://schemas.android.com/apk/res-auto"
+            android:id="@+id/card_view_weather"
+            android:layout_gravity="center"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            card_view:cardElevation="7.5sp"
+            card_view:cardCornerRadius="4dp"
+            android:layout_margin="10dp">
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+                <ImageView
+                    android:id="@+id/imageView1"
+                    android:layout_width="100dp"
+                    android:layout_height="100dp"
+                    android:padding="10dp"
+                    android:layout_marginLeft="5dp"
+                    android:layout_marginTop="5dp"
+                    android:layout_marginBottom="5dp" />
+
+                <TextView
+                    android:id="@+id/t_temperature"
+                    android:layout_width="wrap_content"
+                    android:text="Fetching weather.."
+                    android:paddingLeft="10dp"
+                    android:paddingRight="10dp"
+                    android:paddingBottom="10dp"
+                    android:paddingTop="20dp"
+                    android:layout_height="match_parent"
+                    android:layout_toRightOf="@id/imageView1"
+                    android:layout_marginTop="5dp"
+                    android:layout_marginBottom="5dp"/>
+            </RelativeLayout>
+
+        </android.support.v7.widget.CardView>
+
+        <android.support.v7.widget.CardView
+            xmlns:card_view="http://schemas.android.com/apk/res-auto"
+            android:id="@+id/card_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            card_view:cardCornerRadius="4dp"
+            card_view:cardElevation="7.5sp"
+            android:layout_margin="10dp">
+            <LinearLayout
+                android:orientation="vertical"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <LinearLayout
+                    android:orientation="horizontal"
+                    android:id="@+id/li_layout"
+                    android:layout_width="350dp"
+                    android:layout_height="175dp"
+                    android:layout_gravity="center">
+
+                    <Button
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:textColor="#FFFFFF"
+                        android:background="@drawable/round_button_1"
+                        android:textSize="20dp"
+                        android:backgroundTint="#8E44AD"
+                        android:text="Quick Tips"
+                        android:id="@+id/b_quick_tips"
+                        android:onClick="openQuickTipsActivity"
+                        android:layout_margin="20dp"/>
+
+                    <Button
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:textColor="#FFFFFF"
+                        android:layout_weight="1"
+                        android:background="@drawable/round_button_2"
+                        android:text="Preparing"
+                        android:textSize="20dp"
+                        android:backgroundTint="#2E86C1"
+                        android:id="@+id/b_preparing"
+                        android:onClick="openPreparingActivity"
+                        android:layout_margin="20dp"/>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:orientation="horizontal"
+                    android:layout_width="350dp"
+                    android:layout_height="175dp"
+                    android:layout_gravity="center">
+                    <Button
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:textColor="#FFFFFF"
+                        android:layout_weight="0.9"
+                        android:background="@drawable/round_button_3"
+                        android:text="Listen"
+                        android:textSize="20dp"
+                        android:backgroundTint="#E74C3C"
+                        android:id="@+id/b_listen"
+                        android:onClick="openListenActivity"
+                        android:layout_margin="20dp"/>
+
+                    <Button
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:textColor="#FFFFFF"
+                        android:layout_weight="0.9"
+                        android:background="@drawable/round_button_4"
+                        android:text="Sit"
+                        android:textSize="20dp"
+                        android:backgroundTint="#F1C40F"
+                        android:id="@+id/b_sit"
+                        android:onClick="openSitActivity"
+                        android:layout_margin="20dp"/>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:orientation="horizontal"
+                    android:layout_width="350dp"
+                    android:layout_height="175dp"
+                    android:layout_gravity="center">
+                    <Button
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:textColor="#FFFFFF"
+                        android:layout_weight="1"
+                        android:background="@drawable/round_button_5"
+                        android:text="Down"
+                        android:textSize="20dp"
+                        android:backgroundTint="#2ECC71"
+                        android:id="@+id/b_down"
+                        android:onClick="openDownActivity"
+                        android:layout_margin="20dp" />
+
+                    <Button
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:textColor="#FFFFFF"
+                        android:layout_weight="1"
+                        android:background="@drawable/round_button_6"
+                        android:text="Stay"
+                        android:backgroundTint="#34495E"
+                        android:id="@+id/b_stay"
+                        android:textSize="20dp"
+                        android:onClick="openStayActivity"
+                        android:layout_margin="20dp" />
+                </LinearLayout>
+            </LinearLayout>
+        </android.support.v7.widget.CardView>
+    </LinearLayout>
+</ScrollView>
