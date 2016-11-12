@@ -11,6 +11,8 @@ public class Weather {
     private String temperature = "";
     private String description = "";
     private Drawable drawableImage = null;
+    private String city = "";
+    private String iconCode = "";
 
     public void setTemperature(String temperature)
     {
@@ -35,6 +37,23 @@ public class Weather {
     public Drawable getBitmapImage()
     {
         return this.drawableImage;
+    }
+
+    public void setCity(String city)
+    {
+        this.city = city;
+    }
+    public String getCity()
+    {
+        return this.city;
+    }
+    public void setIconCode(String iconCode)
+    {
+        this.iconCode = iconCode;
+    }
+    public String getIconCode()
+    {
+        return this.iconCode;
     }
 
 }

@@ -1,28 +1,40 @@
 package com.bvbv.dogtraining;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
-import android.graphics.BitmapFactory;
 import android.graphics.Color;
-import android.location.Criteria;
+import android.graphics.Point;
+import android.graphics.drawable.Drawable;
+import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.Vibrator;
+import android.provider.Settings;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.view.Display;
+import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ImageView;
+import android.widget.PopupWindow;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bvbv.location.AppLocationService;
+import com.bvbv.location.ILocationAddressPostExecute;
 import com.bvbv.weather.AsyncWeatherRetrieve;
 import com.bvbv.weather.IWeatherPostExecute;
 import com.bvbv.weather.Weather;
-import com.bvbv.weather.WeatherHttpClient;
+import com.bvbv.location.AsyncLocationAddressRetrieve;
 
 public class MainActivity extends AppCompatActivity {
+
+    static boolean isWeatherProcessComplete = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,25 +43,69 @@ public class MainActivity extends AppCompatActivity {
         final Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         setActivityBackgroundColor(Color.WHITE);
-        IWeatherPostExecute iWeatherPostExecute = new IWeatherPostExecute() {
+        if(!isWeatherProcessComplete)
+            diplayWeatherInformation();
+        else
+            isWeatherProcessComplete = true;
+    }
+
+    private void diplayWeatherInformation() {
+        final IWeatherPostExecute iWeatherPostExecute = new IWeatherPostExecute() {
             @Override
             public void doDelegate(Weather weather) {
                 float temperature = Float.parseFloat(weather.getTemperature());
                 temperature = temperature - 273.15f;
-                //Toast.makeText(MainActivity.this, "Looks like the temperature is " + temperature,
-                       // Toast.LENGTH_LONG).show();
-                ((TextView) findViewById(R.id.t_temperature)).setText("The current temperature is "+
-                        temperature + "°C" + "\nLooks like " + weather.getDescription() + "\nPerfect day for training!");
+                ((TextView) findViewById(R.id.t_temperature)).setText("" + weather.getCity() + " " + temperature + "°C" + "\nLooks like " + weather.getDescription() + "\nPlan your training!");
 
-                ((ImageView)findViewById(R.id.imageView1)).setImageDrawable(weather.getBitmapImage());
-
+                int id = getResources().getIdentifier(getApplicationContext().getPackageName() + ":drawable/" + "weather_" + weather.getIconCode() , null, null);
+                if(id==0)
+                    ((ImageView)findViewById(R.id.imageView1)).setImageDrawable(weather.getBitmapImage());
+                else
+                  ((ImageView)findViewById(R.id.imageView1)).setImageResource(id);
+                isWeatherProcessComplete = true;
             }
         };
 
-        Object []object = new Object[2];
-        object[0] = "Coimbatore";
-        object[1] = iWeatherPostExecute;
-        new AsyncWeatherRetrieve().execute(object);
+        ILocationAddressPostExecute iLocationAddressPostExecute = new ILocationAddressPostExecute() {
+            @Override
+            public void doDelegate(String city) {
+                Object []object = new Object[2];
+                object[0] = city;
+                System.out.println("The retrieved city from location is " + city);
+                object[1] = iWeatherPostExecute;
+                new AsyncWeatherRetrieve().execute(object);
+            }
+        };
+
+        double latitude = 0f;
+        double longitude  = 0f;
+
+        AppLocationService appLocationService = new AppLocationService(getApplicationContext());
+        Location gpsLocation = appLocationService
+                .getLocation(LocationManager.NETWORK_PROVIDER);
+        if (gpsLocation != null) {
+            latitude = gpsLocation.getLatitude();
+            longitude = gpsLocation.getLongitude();
+            Object params[] = new Object[4];
+            params[0] = latitude;
+            params[1] = longitude;
+            params[2] = getApplicationContext();
+            params[3] = iLocationAddressPostExecute;
+            new AsyncLocationAddressRetrieve().execute(params);
+        } else {
+            ((TextView) findViewById(R.id.t_temperature)).setText("Unable to fetch weather..\nEnable location services?");
+            Toast.makeText(getApplicationContext(), "Could not retrieve the location information!",
+                    Toast.LENGTH_SHORT).show();
+            //showSettingsAlert();
+            (findViewById(R.id.t_temperature)).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent intent = new Intent(
+                            Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+                    MainActivity.this.startActivity(intent);
+                }
+            });
+        }
     }
 
     public void setActivityBackgroundColor(int color) {
@@ -132,5 +188,55 @@ public class MainActivity extends AppCompatActivity {
     {
         Vibrator v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
         v.vibrate(16);
+    }
+
+    public void openAboutPage(MenuItem item) {
+        Intent intent = new Intent(this, AboutPage.class);
+        startActivity(intent);
+        /*LayoutInflater layoutInflater = (LayoutInflater)getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        final View inflatedView = layoutInflater.inflate(R.layout.activity_about_page, null,false);
+
+        Display display = getWindowManager().getDefaultDisplay();
+        Point size = new Point();
+        display.getSize(size);
+
+        PopupWindow popWindow = new PopupWindow(inflatedView, size.x - 100,size.y - size.y/2, true );
+        popWindow.setFocusable(true);
+        popWindow.setOutsideTouchable(true);
+        popWindow.setBackgroundDrawable(getResources().getDrawable(R.drawable.button_home));
+        popWindow.showAtLocation(findViewById(R.id.main_layout), Gravity.BOTTOM, 0,150);  // 0 - X postion and 150 - Y position*/
+
+    }
+
+    public void showSettingsAlert() {
+        AlertDialog.Builder alertDialog = new AlertDialog.Builder(
+                MainActivity.this);
+        alertDialog.setTitle("SETTINGS");
+        alertDialog.setMessage("Enable location services! Go to settings menu?");
+        alertDialog.setPositiveButton("Settings",
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        Intent intent = new Intent(
+                                Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+                        MainActivity.this.startActivity(intent);
+                }
+                });
+        alertDialog.setNegativeButton("Cancel",
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        (findViewById(R.id.card_view_weather)).setVisibility(View.GONE);
+                        dialog.cancel();
+                    }
+                });
+        alertDialog.show();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if(!isWeatherProcessComplete) {
+            (findViewById(R.id.t_temperature)).setOnClickListener(null);
+            diplayWeatherInformation();
+        }
     }
 }

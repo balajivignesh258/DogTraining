@@ -8,4 +8,10 @@
         android:icon="@drawable/ic_general_setting"
         android:title="@string/action_settings"
         app:showAsAction="never" />
+    <item
+        android:id="@+id/about_page"
+        android:orderInCategory="100"
+        android:title="About"
+        android:onClick="openAboutPage"
+        app:showAsAction="never" />
 </menu>

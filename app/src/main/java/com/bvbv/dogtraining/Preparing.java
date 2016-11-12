@@ -9,6 +9,7 @@ import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.method.ScrollingMovementMethod;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.animation.AlphaAnimation;
 import android.widget.TextView;
@@ -16,6 +17,7 @@ import android.widget.TextView;
 public class Preparing extends AppCompatActivity {
 
     String [] displayPoints;
+    String heading;
     int currentPage;
     int totalPages;
     private AlphaAnimation buttonClick = new AlphaAnimation(1F, 0.8F);
@@ -26,6 +28,7 @@ public class Preparing extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_preparing);
         Intent intent = getIntent();
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         String activityToOpen = intent.getStringExtra("activityToOpen");
         ((TextView) findViewById(R.id.a_t_preparing)).setMovementMethod(new ScrollingMovementMethod());
         switch(activityToOpen)
@@ -84,8 +87,10 @@ public class Preparing extends AppCompatActivity {
         displayPoints[1] = "NEVER punish your dog – this will cause him to be frightened of you.\nSHOW your dog what you are trying to teach him – NEVER physically" +
                 " force him.\nBe patient and keep commands consistent.\nDon’t let him get bored, keep training sessions short.";
         displayPoints[2] = "Never ‘train’ in a busy area, only begin to build up the distractions gradually once he knows the commands really well.";
-        ((TextView) findViewById(R.id.sub_activity_heading)).setText("Quick Tips");
+        heading = "Quick Tips";
+        ((TextView) findViewById(R.id.sub_activity_heading)).setText(heading + " " + currentPage + "/" + totalPages);
         ((TextView) findViewById(R.id.a_t_preparing)).setText(displayPoints[currentPage-1]);
+        ((TextView) findViewById(R.id.a_t_preparing)).scrollTo(0,0);
     }
 
     private void prepareForPreparing() {
@@ -105,7 +110,8 @@ public class Preparing extends AppCompatActivity {
                 "4)\tWhere unwanted behaviour cannot be ignored or avoided, train an alternative, acceptable behaviour for your dog to perform instead. It is much easier to train a dog to do something else that you don’t mind, than to train him to completely stop something that you do not like. For example, if your dog jumps up at people, teach him a really good ‘sit’ command and ask for this when meeting others. \n" +
                 "5)\tIf he is rewarded with treats and attention every time he sits, he’ll soon automatically be doing this when he meets people, instead of jumping up!";
 
-        ((TextView) findViewById(R.id.sub_activity_heading)).setText("Preparing");
+        heading = "Preparing";
+        ((TextView) findViewById(R.id.sub_activity_heading)).setText(heading + " " + currentPage + "/" + totalPages);
         ((TextView) findViewById(R.id.a_t_preparing)).setText(displayPoints[currentPage-1]);
         ((TextView) findViewById(R.id.a_t_preparing)).scrollTo(0,0);
     }
@@ -123,8 +129,11 @@ public class Preparing extends AppCompatActivity {
                 "a result and this may hurt his back.\n\n" +
                 "When training your dog to sit, use the command 'sit'. Do not use 'sit down' as this may " +
                 "confuse your dog when you try to teach the 'down' command.\n";
-        ((TextView) findViewById(R.id.sub_activity_heading)).setText("Sit");
+
+        heading = "Sit";
+        ((TextView) findViewById(R.id.sub_activity_heading)).setText(heading + " " + currentPage + "/" + totalPages);
         ((TextView) findViewById(R.id.a_t_preparing)).setText(displayPoints[currentPage-1]);
+        ((TextView) findViewById(R.id.a_t_preparing)).scrollTo(0,0);
     }
 
     private void prepareForDown() {
@@ -138,8 +147,10 @@ public class Preparing extends AppCompatActivity {
                 "chair between you and your dog and try again. He will have to lie down to get under the barrier " +
                 "to get the treat. Remove the barrier when he gets the hang of it.\n\n" +
                 "Do not push or force his back down as he will push against you and this may hurt his back.";
-        ((TextView) findViewById(R.id.sub_activity_heading)).setText("Down");
+        heading = "Down";
+        ((TextView) findViewById(R.id.sub_activity_heading)).setText(heading + " " + currentPage + "/" + totalPages);
         ((TextView) findViewById(R.id.a_t_preparing)).setText(displayPoints[currentPage-1]);
+        ((TextView) findViewById(R.id.a_t_preparing)).scrollTo(0,0);
     }
 
 
@@ -153,8 +164,10 @@ public class Preparing extends AppCompatActivity {
                 "4) If he gets up, ask him to sit again and repeat the procedure.";
         displayPoints[1] = "Once he is doing this short 'stay' command correctly, gradually increase the distance between you and your dog and/or the time that he is asked to stay.\n" +
                 "\nIf he gets up when he is not supposed to, go back a stage to a shorter distance or time, and then increase again slowly until he is doing as he is told every time.";
-        ((TextView) findViewById(R.id.sub_activity_heading)).setText("Stay");
+        heading = "Stay";
+        ((TextView) findViewById(R.id.sub_activity_heading)).setText(heading + " " + currentPage + "/" + totalPages);
         ((TextView) findViewById(R.id.a_t_preparing)).setText(displayPoints[currentPage-1]);
+        ((TextView) findViewById(R.id.a_t_preparing)).scrollTo(0,0);
     }
 
 
@@ -164,8 +177,10 @@ public class Preparing extends AppCompatActivity {
         totalPages = 2;
         displayPoints[0] = "Choose a dog that fits your lifestyle. After centuries of breeding, the modern dog is one of the most varied species of animal on earth. While there's probably a dog to suit every lifestyle, not all dogs will fit your specific needs. For example, if you like to relax, you should not get a Jack Russell Terrier, known for its constant barking and high energy. Instead, you might want a bulldog, that would much prefer to cuddle on the couch all day. Research the personalities and care requirements of various breeds. Ask dog owners about their breed's personaity";
         displayPoints[1] = "You are now prepared!";
-        ((TextView) findViewById(R.id.sub_activity_heading)).setText("Listen");
+        heading = "Listen";
+        ((TextView) findViewById(R.id.sub_activity_heading)).setText(heading + " " + currentPage + "/" + totalPages);
         ((TextView) findViewById(R.id.a_t_preparing)).setText(displayPoints[currentPage-1]);
+        ((TextView) findViewById(R.id.a_t_preparing)).scrollTo(0,0);
     }
 
     public void nextPage(View view) {
@@ -176,6 +191,8 @@ public class Preparing extends AppCompatActivity {
         if(currentPage<totalPages) {
             ((TextView) findViewById(R.id.a_t_preparing)).setText(displayPoints[++currentPage-1]);
             ((TextView) findViewById(R.id.a_t_preparing)).scrollTo(0,0);
+            ((TextView) findViewById(R.id.a_t_preparing)).scrollTo(0,0);
+            ((TextView) findViewById(R.id.sub_activity_heading)).setText(heading + " " + currentPage + "/" + totalPages);
             handleNavigationButtons();
         }
     }
@@ -187,6 +204,8 @@ public class Preparing extends AppCompatActivity {
         if(currentPage>1) {
             ((TextView) findViewById(R.id.a_t_preparing)).setText(displayPoints[--currentPage-1]);
             ((TextView) findViewById(R.id.a_t_preparing)).scrollTo(0,0);
+            ((TextView) findViewById(R.id.a_t_preparing)).scrollTo(0,0);
+            ((TextView) findViewById(R.id.sub_activity_heading)).setText(heading + " " + currentPage + "/" + totalPages);
             handleNavigationButtons();
         }
     }
@@ -219,7 +238,15 @@ public class Preparing extends AppCompatActivity {
     public void goToHome(View view) {
         Vibrator v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
         v.vibrate(16);
-        Intent intent = new Intent(this, MainActivity.class);
-        startActivity(intent);
+        finish();
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == android.R.id.home) // Press Back Icon
+        {
+            finish();
+        }
+        return super.onOptionsItemSelected(item);
     }
 }

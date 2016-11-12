@@ -1,17 +1,11 @@
 package com.bvbv.weather;
 
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import java.io.BufferedInputStream;
-import java.io.IOException;
-import java.io.InputStream;
 
 /**
  * Created by Balaji Vignesh on 07-Nov-16.
@@ -37,6 +31,7 @@ public class AsyncWeatherRetrieve extends AsyncTask<Object, Void, Object[]> {
 
         if(iconCode!=null)
         {
+
             imageData= weatherHttpClient.getImage(iconCode);
         }
         else {
@@ -52,16 +47,19 @@ public class AsyncWeatherRetrieve extends AsyncTask<Object, Void, Object[]> {
 
     protected void onPostExecute(Object[] object) {
         Weather weather = new Weather();
+        weather.setIconCode("");
         weather.setTemperature("");
         weather.setDescription("");
         weather.setBitmapImage(null);
         try {
             JSONObject reader = new JSONObject((String)object[0]);
             JSONObject main  = reader.getJSONObject("main");
+            weather.setIconCode(reader.getJSONArray("weather").getJSONObject(0).getString("icon"));
             weather.setTemperature(main.getString("temp"));
             JSONArray weatherJson = reader.getJSONArray("weather");
             weather.setDescription(weatherJson.getJSONObject(0).getString("description"));
             weather.setBitmapImage((Drawable)object[2]);
+            weather.setCity(reader.getString("name"));
             ((IWeatherPostExecute)object[1]).doDelegate(weather);
         }catch (Exception e)
         {
