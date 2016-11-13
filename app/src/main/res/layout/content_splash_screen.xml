@@ -15,38 +15,37 @@
     <RelativeLayout
         android:id="@+id/relativeLayout"
         android:layout_width="match_parent"
-        android:layout_height="120dp"
+        android:layout_height="match_parent"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
         android:layout_centerVertical="true"
         android:gravity="center_vertical">
+
         <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="120dp"
+        android:layout_height="match_parent"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
         android:layout_centerVertical="true"
         android:gravity="center_horizontal">
             <ImageView
                 android:id="@+id/imageView"
-                android:layout_width="100dp"
-                android:layout_height="100dp"
-                android:layout_alignParentLeft="true"
-                android:layout_alignParentStart="true"
+                android:layout_width="300dp"
+                android:layout_height="300dp"
                 android:layout_alignParentTop="true"
-                android:background="@mipmap/ic_launcher" />
+                android:layout_centerHorizontal="true"
+                android:background="@drawable/splashimage" />
 
             <TextView
                 android:id="@+id/t_dog_training"
                 android:layout_width="wrap_content"
                 android:layout_height="61dp"
-                android:layout_centerVertical="true"
-                android:layout_toEndOf="@+id/imageView"
-                android:layout_toRightOf="@+id/imageView"
+                android:layout_below="@+id/imageView"
+                android:layout_centerHorizontal="true"
                 android:text="@string/dog_training"
                 android:textAppearance="?android:attr/textAppearanceLarge"
                 android:textColor="#E74C3C"
-                android:textSize="30dp"
+                android:textSize="40dp"
                 android:textStyle="bold" />
 
             <TextView

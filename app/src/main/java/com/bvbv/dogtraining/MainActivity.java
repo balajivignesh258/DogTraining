@@ -1,5 +1,6 @@
 package com.bvbv.dogtraining;
 
+import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -8,6 +9,7 @@ import android.location.Location;
 import android.location.LocationManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Vibrator;
 import android.provider.Settings;
@@ -27,6 +29,8 @@ import com.bvbv.weather.AsyncWeatherRetrieve;
 import com.bvbv.weather.IWeatherPostExecute;
 import com.bvbv.weather.Weather;
 import com.bvbv.location.AsyncLocationAddressRetrieve;
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdView;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -41,6 +45,7 @@ public class MainActivity extends AppCompatActivity {
         setActivityBackgroundColor(Color.WHITE);
         if(!isWeatherProcessComplete && isNetworkAvailable())
             diplayWeatherInformation();
+
     }
 
     private boolean isNetworkAvailable() {
@@ -192,6 +197,60 @@ public class MainActivity extends AppCompatActivity {
         Intent intent = new Intent(this, Preparing.class);
         intent.putExtra("activityToOpen", "Listen");
         startActivity(intent);
+    }
+
+    public void openRollOverActivity(View view) {
+        vibrateForPress();
+        Intent intent = new Intent(this, Preparing.class);
+        intent.putExtra("activityToOpen", "RollOver");
+        startActivity(intent);
+    }
+
+    public void openFetchActivity(View view) {
+        vibrateForPress();
+        Intent intent = new Intent(this, Preparing.class);
+        intent.putExtra("activityToOpen", "Fetch");
+        startActivity(intent);
+    }
+
+    public void openHeelActivity(View view) {
+        vibrateForPress();
+        Intent intent = new Intent(this, Preparing.class);
+        intent.putExtra("activityToOpen", "Heel");
+        startActivity(intent);
+    }
+
+    public void openMoreActivity(final View view) {
+        vibrateForPress();
+        final Context context = view.getContext();
+        new AlertDialog.Builder(context)
+        .setTitle("Dog Training")
+        .setMessage("We are pleased that you like this app. There will be more things coming soon." +
+                "Please support us by rating our app in the play store.")
+        .setPositiveButton("Later", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int which) {
+                // do nothing
+            }
+        })
+        .setNegativeButton("Rate", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int which) {
+                Uri uri = Uri.parse("market://details?id=" + context.getPackageName());
+                Intent goToMarket = new Intent(Intent.ACTION_VIEW, uri);
+                // To count with Play market backstack, After pressing back button,
+                // to taken back to our application, we need to add following flags to intent.
+                goToMarket.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY |
+                        Intent.FLAG_ACTIVITY_NEW_DOCUMENT |
+                        Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
+                try {
+                    startActivity(goToMarket);
+                } catch (ActivityNotFoundException e) {
+                    startActivity(new Intent(Intent.ACTION_VIEW,
+                            Uri.parse("http://play.google.com/store/apps/details?id=" + context.getPackageName())));
+                }
+            }
+        })
+        .setIcon(R.mipmap.ic_launcher)
+        .show();
     }
 
     public void vibrateForPress()
