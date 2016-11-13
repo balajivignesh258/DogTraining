@@ -1,6 +1,9 @@
 package com.bvbv.weather;
 
+import android.content.Context;
 import android.graphics.drawable.Drawable;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.AsyncTask;
 
 import org.json.JSONArray;
@@ -25,13 +28,12 @@ public class AsyncWeatherRetrieve extends AsyncTask<Object, Void, Object[]> {
             JSONObject reader = new JSONObject(data);
             System.out.println("Reader data :" +  reader);
             iconCode = reader.getJSONArray("weather").getJSONObject(0).getString("icon");
-        } catch (JSONException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
         if(iconCode!=null)
         {
-
             imageData= weatherHttpClient.getImage(iconCode);
         }
         else {
@@ -44,6 +46,7 @@ public class AsyncWeatherRetrieve extends AsyncTask<Object, Void, Object[]> {
         object[2] = imageData;
         return object;
     }
+
 
     protected void onPostExecute(Object[] object) {
         Weather weather = new Weather();

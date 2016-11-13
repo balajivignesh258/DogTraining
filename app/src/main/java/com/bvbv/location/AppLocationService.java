@@ -6,19 +6,22 @@ package com.bvbv.location;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 
 public class AppLocationService extends Service implements LocationListener {
 
-    protected LocationManager locationManager;
-    Location location;
-
     private static final long MIN_DISTANCE_FOR_UPDATE = 10;
     private static final long MIN_TIME_FOR_UPDATE = 1000 * 60 * 2;
+    protected LocationManager locationManager;
+    Location location;
 
     public AppLocationService(Context context) {
         locationManager = (LocationManager) context
@@ -27,14 +30,20 @@ public class AppLocationService extends Service implements LocationListener {
 
     public Location getLocation(String provider) {
 
-        if (locationManager.isProviderEnabled(provider)) {
-            locationManager.requestLocationUpdates(provider,
-                    MIN_TIME_FOR_UPDATE, MIN_DISTANCE_FOR_UPDATE, this);
-            if (locationManager != null) {
-                location = locationManager.getLastKnownLocation(provider);
-                return location;
+        try {
+            if (locationManager.isProviderEnabled(provider)) {
+                locationManager.requestLocationUpdates(provider,
+                        MIN_TIME_FOR_UPDATE, MIN_DISTANCE_FOR_UPDATE, this);
+                if (locationManager != null) {
+                    location = locationManager.getLastKnownLocation(provider);
+                    return location;
+                }
             }
+        }catch (Exception e)
+        {
+            System.out.println(e.getMessage());
         }
+
         return null;
     }
 

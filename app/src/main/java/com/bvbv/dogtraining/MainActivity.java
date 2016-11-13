@@ -4,24 +4,20 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
-import android.graphics.Point;
-import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.location.LocationManager;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.os.Vibrator;
 import android.provider.Settings;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.view.Display;
-import android.view.Gravity;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ImageView;
-import android.widget.PopupWindow;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -34,7 +30,7 @@ import com.bvbv.location.AsyncLocationAddressRetrieve;
 
 public class MainActivity extends AppCompatActivity {
 
-    static boolean isWeatherProcessComplete = false;
+    boolean isWeatherProcessComplete = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,10 +39,24 @@ public class MainActivity extends AppCompatActivity {
         final Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         setActivityBackgroundColor(Color.WHITE);
-        if(!isWeatherProcessComplete)
+        if(!isWeatherProcessComplete && isNetworkAvailable())
             diplayWeatherInformation();
-        else
-            isWeatherProcessComplete = true;
+    }
+
+    private boolean isNetworkAvailable() {
+        System.out.println("Came to isNetworkAvailable");
+        ConnectivityManager connectivityManager
+                = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+        System.out.println("Result:-->" + (activeNetworkInfo != null && activeNetworkInfo.isConnected()));
+        if(!(activeNetworkInfo != null && activeNetworkInfo.isConnectedOrConnecting()))
+        {
+            System.out.println("Result inside:-->" + (activeNetworkInfo != null && activeNetworkInfo.isConnectedOrConnecting()));
+            ((TextView) findViewById(R.id.t_temperature)).setText("No network access..");
+            Toast.makeText(getApplicationContext(), "No network access..",
+                    Toast.LENGTH_SHORT).show();
+        }
+        return activeNetworkInfo != null && activeNetworkInfo.isConnected();
     }
 
     private void diplayWeatherInformation() {
@@ -94,8 +104,8 @@ public class MainActivity extends AppCompatActivity {
             new AsyncLocationAddressRetrieve().execute(params);
         } else {
             ((TextView) findViewById(R.id.t_temperature)).setText("Unable to fetch weather..\nEnable location services?");
-            Toast.makeText(getApplicationContext(), "Could not retrieve the location information!",
-                    Toast.LENGTH_SHORT).show();
+            //Toast.makeText(getApplicationContext(), "Could not retrieve the location information!",
+                    //Toast.LENGTH_SHORT).show();
             //showSettingsAlert();
             (findViewById(R.id.t_temperature)).setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -235,8 +245,12 @@ public class MainActivity extends AppCompatActivity {
     public void onResume() {
         super.onResume();
         if(!isWeatherProcessComplete) {
-            (findViewById(R.id.t_temperature)).setOnClickListener(null);
-            diplayWeatherInformation();
+            ((TextView)findViewById(R.id.t_temperature)).setText("Welcome....!");
+            if(isNetworkAvailable())
+            {
+                (findViewById(R.id.t_temperature)).setOnClickListener(null);
+                diplayWeatherInformation();
+            }
         }
     }
 }
