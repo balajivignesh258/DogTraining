@@ -1,27 +1,39 @@
 package com.bvbv.dogtraining;
 
-import android.app.ActionBar;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Vibrator;
 import android.preference.PreferenceManager;
+import android.support.design.widget.Snackbar;
+import android.support.v4.view.GestureDetectorCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.method.ScrollingMovementMethod;
+import android.view.GestureDetector;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.animation.AlphaAnimation;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
+import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
-public class Preparing extends AppCompatActivity {
+public class Preparing extends AppCompatActivity implements GestureDetector.OnGestureListener{
 
+    private static final int SWIPE_MIN_DISTANCE = 120;
+    private static final int SWIPE_MAX_OFF_PATH = 250;
+    private static final int SWIPE_THRESHOLD_VELOCITY = 200;
+    private static boolean snackMessageRead = false;
     String [] displayPoints;
     String heading;
     int currentPage;
     int totalPages;
     AdsManager adsManager;
     private AlphaAnimation buttonClick = new AlphaAnimation(1F, 0.8F);
+    private GestureDetectorCompat mDetector;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,6 +43,12 @@ public class Preparing extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         String activityToOpen = intent.getStringExtra("activityToOpen");
         ((TextView) findViewById(R.id.a_t_preparing)).setMovementMethod(new ScrollingMovementMethod());
+        mDetector = new GestureDetectorCompat(this,this);
+        ((TextView) findViewById(R.id.a_t_preparing)).setOnTouchListener(new View.OnTouchListener(){
+            public boolean onTouch(View v, MotionEvent me){
+                return mDetector.onTouchEvent(me);
+            }
+        });
         switch(activityToOpen)
         {
             case "QuickTips":
@@ -64,8 +82,8 @@ public class Preparing extends AppCompatActivity {
                 //Should not come here
                 break;        }
         //Initially disable the previous button
-        (findViewById(R.id.nav_prev)).setEnabled(false);
-        (findViewById(R.id.nav_prev)).getBackground().setAlpha(64);
+        //(findViewById(R.id.nav_prev)).setEnabled(false);
+        //(findViewById(R.id.nav_prev)).getBackground().setAlpha(64);
 
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
         String textSize = prefs.getString("font_list", "Medium");
@@ -84,14 +102,25 @@ public class Preparing extends AppCompatActivity {
                 ((TextView) findViewById(R.id.a_t_preparing)).setTextAppearance(this,android.R.style.TextAppearance_Medium);
                 break;
         }
-
-
         adsManager = new AdsManager();
         adsManager.createAd(getApplicationContext());
+
+        if(!snackMessageRead)
+        {
+            Snackbar snackbar = Snackbar
+                    .make(((TextView) findViewById(R.id.a_t_preparing)), "Swipe left/right to continue reading", Snackbar.LENGTH_INDEFINITE)
+                    .setAction("OK", new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            snackMessageRead = true;
+                        }
+                    });
+            snackbar.show();
+        }
     }
 
-
     private void prepareForQuickTips() {
+        ((ImageView) findViewById(R.id.image_preparing)).setImageResource(R.drawable.dog_command_image_quick_tips);
         displayPoints = new String[10];
         currentPage = 1;
         totalPages = 10;
@@ -107,12 +136,14 @@ public class Preparing extends AppCompatActivity {
         displayPoints[9] = "FREEDOM\n\nLet your new dog gradually earn freedom throughout your home. A common error that many pet parents make is giving their new dog too much freedom too soon. This can easily lead to accidents relating to housetraining and destructive chewing. So, close off doors to unoccupied rooms and use baby gates to section off parts of the house, if necessary. One of the best ways to minimize incidents is to keep your dog tethered to you in the house and by using a crate or doggie safe area when you can’t actively supervise him.";
 
         heading = "Quick Tips";
-        ((TextView) findViewById(R.id.sub_activity_heading)).setText(heading + " " + currentPage + "/" + totalPages);
+        ((TextView) findViewById(R.id.sub_activity_heading)).setText(heading);
+        ((TextView) findViewById(R.id.sub_activity_page_number)).setText("Page: "+ currentPage + "/" + totalPages);
         ((TextView) findViewById(R.id.a_t_preparing)).setText(displayPoints[currentPage-1]);
         ((TextView) findViewById(R.id.a_t_preparing)).scrollTo(0,0);
     }
 
     private void prepareForPreparing() {
+        ((ImageView) findViewById(R.id.image_preparing)).setImageResource(R.drawable.dog_command_image_preparing);
         displayPoints = new String[5];
         currentPage = 1;
         totalPages = 5;
@@ -130,33 +161,37 @@ public class Preparing extends AppCompatActivity {
                 "5)\tIf he is rewarded with treats and attention every time he sits, he’ll soon automatically be doing this when he meets people, instead of jumping up!";
 
         heading = "Preparing";
-        ((TextView) findViewById(R.id.sub_activity_heading)).setText(heading + " " + currentPage + "/" + totalPages);
+        ((TextView) findViewById(R.id.sub_activity_heading)).setText(heading);
+        ((TextView) findViewById(R.id.sub_activity_page_number)).setText("Page: " + currentPage + "/" + totalPages);
         ((TextView) findViewById(R.id.a_t_preparing)).setText(displayPoints[currentPage-1]);
         ((TextView) findViewById(R.id.a_t_preparing)).scrollTo(0,0);
     }
 
     private void prepareForSit() {
+        ((ImageView) findViewById(R.id.image_preparing)).setImageResource(R.drawable.dog_command_image_sit);
         displayPoints = new String[5];
         currentPage = 1;
         totalPages = 5;
         displayPoints[0] = "Does your dog know how to sit on cue? Teaching the \"sit\" command to your dog is usually quite simple, as dogs tend to sit naturally. Sit is an important basic command. It is a way to help your dog settle a little bit in one place and focus on you. It can also help lay the groundwork for the stay command. The key is for your dog to associate the word with the action. The sit command sets the groundwork for other commands like stay and down.";
-        displayPoints[1] = "When your dog is in the proper sitting position, her hocks and bottom are firmly planted on the ground. Some dogs will cheat and \"hover\" above the ground a little, so be sure not to reward until that butt is on the ground! Ideally, your dog will remain sitting until you release him (some trainers use the word \"okay\" as a release cue). With practice, you can get your dog to perfect his sit.";
-        displayPoints[2] = "Get your dog’s attention and show her that you have a treat in your hand.\n" +
+        displayPoints[1] = "When your dog is in the proper sitting position, his hocks and bottom are firmly planted on the ground. Some dogs will cheat and \"hover\" above the ground a little, so be sure not to reward until that butt is on the ground! Ideally, your dog will remain sitting until you release him (some trainers use the word \"okay\" as a release cue). With practice, you can get your dog to perfect his sit.";
+        displayPoints[2] = "Get your dog’s attention and show him that you have a treat in your hand.\n" +
                 "Hold the treat just above your dog’s nose (not too high or he might jump).\n" +
                 "Say your dog’s name followed by the word “sit,” spoken clearly and firmly.\n" +
                 "Move the treat back towards your dog’s ears.\n" +
                 "As soon as your dog’s rear lands on the ground, say “good sit” in an upbeat tone.\n" +
                 "Give your dog the treat followed by petting and praising.\n";
-        displayPoints[3] = "If your dog does not sit on her own after a few tries, avoid pushing her into a sitting position. Dogs don't tend to learn well that way. Also, avoid yelling or punishment. Instead, consider trying more valuable treats, like fresh meat. If you are still having trouble getting your dog to sit with valuable treats, consider marking the behavior. Spend some time watching her. Anytime he naturally sits, praise and reward her, saying the word \"sit.\" Try this every time you see her sitting. You'll want to carry treats with you at all times to make this work well.";
-        displayPoints[4] = "Hold short training sessions throughout the day in various locations, both indoor and outdoors. End training session on a positive note (with a success). Train the sit command in various locations. Include the front door and food bowl as regular training locations. This will make her more likely to sit when greeting guests or before feeding. Once your dog becomes an expert at sitting, you won't have to give her a treat each time. However, it's a good idea to give treats occasionally in order to reinforce the behavior. Of course, rewarding with praise is always a good idea.";
+        displayPoints[3] = "If your dog does not sit on his own after a few tries, avoid pushing him into a sitting position. Dogs don't tend to learn well that way. Also, avoid yelling or punishment. Instead, consider trying more valuable treats, like fresh meat. If you are still having trouble getting your dog to sit with valuable treats, consider marking the behavior. Spend some time watching her. Anytime he naturally sits, praise and reward her, saying the word \"sit.\" Try this every time you see him sitting. You'll want to carry treats with you at all times to make this work well.";
+        displayPoints[4] = "Hold short training sessions throughout the day in various locations, both indoor and outdoors. End training session on a positive note (with a success). Train the sit command in various locations. Include the front door and food bowl as regular training locations. This will make him more likely to sit when greeting guests or before feeding. Once your dog becomes an expert at sitting, you won't have to give him a treat each time. However, it's a good idea to give treats occasionally in order to reinforce the behavior. Of course, rewarding with praise is always a good idea.";
 
         heading = "Sit";
-        ((TextView) findViewById(R.id.sub_activity_heading)).setText(heading + " " + currentPage + "/" + totalPages);
+        ((TextView) findViewById(R.id.sub_activity_heading)).setText(heading);
+        ((TextView) findViewById(R.id.sub_activity_page_number)).setText("Page: "+ currentPage + "/" + totalPages);
         ((TextView) findViewById(R.id.a_t_preparing)).setText(displayPoints[currentPage-1]);
         ((TextView) findViewById(R.id.a_t_preparing)).scrollTo(0,0);
     }
 
     private void prepareForDown() {
+        ((ImageView) findViewById(R.id.image_preparing)).setImageResource(R.drawable.dog_command_image_down);
         displayPoints = new String[3];
         currentPage = 1;
         totalPages = 3;
@@ -173,26 +208,28 @@ public class Preparing extends AppCompatActivity {
                 "Once your dog becomes an expert at lying down, you no longer need to give a treat every time. It's a good idea to give treats occasionally to reinforce the behavior. In addition, rewarding with praise is always a good idea.";
 
         heading = "Down";
-        ((TextView) findViewById(R.id.sub_activity_heading)).setText(heading + " " + currentPage + "/" + totalPages);
+        ((TextView) findViewById(R.id.sub_activity_heading)).setText(heading);
+        ((TextView) findViewById(R.id.sub_activity_page_number)).setText("Page: "+ currentPage + "/" + totalPages);
         ((TextView) findViewById(R.id.a_t_preparing)).setText(displayPoints[currentPage-1]);
         ((TextView) findViewById(R.id.a_t_preparing)).scrollTo(0,0);
     }
 
 
     private void prepareForStay() {
+        ((ImageView) findViewById(R.id.image_preparing)).setImageResource(R.drawable.dog_command_image_stay);
         displayPoints = new String[4];
         currentPage = 1;
         totalPages = 4;
         displayPoints[0] = "Does your dog know how to stay in place when asked? Almost as important as coming when called, the stay command can prevent your dog from getting involved in dangerous situations. It will also allow you to keep your dog still and calm while you take care of household chores, entertain guests, or bring your dog to public places. A successful “stay” occurs when your dog does not move at all from the original position. Start with 1-2 second periods of staying and work up to several minutes.";
         displayPoints[1] = "Place the collar and long leash on your dog.\n" +
-                "Tell her to sit or lie down.\n" +
+                "Tell him to sit or lie down.\n" +
                 "Say “stay” in a firm, clear voice while holding one hand up, palm out (as if to motion stop).\n" +
-                "If your dog does not move, give her a treat and praise.\n" +
-                "Release your dog from the command by saying “okay” and encouraging her to move.\n" +
-                "Instruct your dog to sit again and praise her when he complies.\n" +
+                "If your dog does not move, give him a treat and praise.\n" +
+                "Release your dog from the command by saying “okay” and encouraging him to move.\n" +
+                "Instruct your dog to sit again and praise him when he complies.\n" +
                 "Say \"stay\" again with the hand motion while taking a step or two back.\n" +
-                "If he stays, give her a treat and praise. If he moves, start over from step 1.\n" +
-                "Release your dog from the command by saying “okay” and encouraging her to move.\n" +
+                "If he stays, give him a treat and praise. If he moves, start over from step 1.\n" +
+                "Release your dog from the command by saying “okay” and encouraging him to move.\n" +
                 "Repeat this process 5-6 times, gradually taking more steps back and increasing the time period between “stay” and “okay”.";
         displayPoints[2] = "Keep training sessions short and try to end on a positive note with a successful action. If your dog cannot yet stay, then end the session with sit or something else your dog knows.\n" +
                 "Over time, you should gradually increase the distance between you and your dog. Try to get to the end of the long leash. Remain in your dog’s sight until he understands how to stay. Then, you can try leaving the room after giving the stay command.\n" +
@@ -202,30 +239,34 @@ public class Preparing extends AppCompatActivity {
                 "Once your dog becomes an expert at staying, you no longer need to give a treat every time, only occasionally. However, rewarding with praise is always a good idea.";
 
         heading = "Stay";
-        ((TextView) findViewById(R.id.sub_activity_heading)).setText(heading + " " + currentPage + "/" + totalPages);
+        ((TextView) findViewById(R.id.sub_activity_heading)).setText(heading);
+        ((TextView) findViewById(R.id.sub_activity_page_number)).setText("Page: "+ currentPage + "/" + totalPages);
         ((TextView) findViewById(R.id.a_t_preparing)).setText(displayPoints[currentPage-1]);
         ((TextView) findViewById(R.id.a_t_preparing)).scrollTo(0,0);
     }
 
 
     private void prepareForListen() {
+        ((ImageView) findViewById(R.id.image_preparing)).setImageResource(R.drawable.dog_command_image_listen);
         displayPoints = new String[2];
         currentPage = 1;
         totalPages = 2;
-        displayPoints[0] = "The idea behind name recognition is to teach your dog that her name means something wonderful is about to happen! Start your first session when you have your dog’s attention. With some dog treats on hand, say your dog’s name and then using an indicator (a word like “yes”), immediately give her a treat. Wait a few seconds and then repeat. Do this for five minutes several times a day.\n" +
+        displayPoints[0] = "The idea behind name recognition is to teach your dog that his name means something wonderful is about to happen! Start your first session when you have your dog’s attention. With some dog treats on hand, say your dog’s name and then using an indicator (a word like “yes”), immediately give him a treat. Wait a few seconds and then repeat. Do this for five minutes several times a day.\n" +
                 "\n" +
-                "After a few sessions your pup will probably begin to associate the sound of her name with a tasty treat. Now you should begin the exercise when your dog’s attention is not focused on you. It’s a good idea to have your pet on a Dog Collar and Dog Leash for your training sessions so that you can prevent her from leaving, jumping, or other undesirable behaviors. When your dog is distracted call her name. As soon as he turns and orients toward you, say “yes!” and immediately give her a treat.\n" +
+                "After a few sessions your pup will probably begin to associate the sound of his name with a tasty treat. Now you should begin the exercise when your dog’s attention is not focused on you. It’s a good idea to have your pet on a Dog Collar and Dog Leash for your training sessions so that you can prevent him from leaving, jumping, or other undesirable behaviors. When your dog is distracted call his name. As soon as he turns and orients toward you, say “yes!” and immediately give him a treat.\n" +
                 "\n" +
-                "If your dog doesn’t turn to look at you, gently pull her toward you with the leash. When he does finally orient toward you, say “yes!” and give her a dog treat. Repeat this exercise as many times a day as you can and in as many different environments as possible. Turn your daily walks into training walks and before you know it, your dog will be responding to her name reliably.\n";
-        displayPoints[1] = "A few words of caution: don’t use your dog’s name too casually otherwise it will become like white noise. Also, never use your dog’s name to correct or punish her in any way. Her name should predict something wonderful.\n" +
+                "If your dog doesn’t turn to look at you, gently pull him toward you with the leash. When he does finally orient toward you, say “yes!” and give him a dog treat. Repeat this exercise as many times a day as you can and in as many different environments as possible. Turn your daily walks into training walks and before you know it, your dog will be responding to his name reliably.\n";
+        displayPoints[1] = "A few words of caution: don’t use your dog’s name too casually otherwise it will become like white noise. Also, never use your dog’s name to correct or punish him in any way. His name should predict something wonderful.\n" +
                 "\n" +
-                "Ensuring that your dog knows her name is not only a fun exercise – it is a great safety net. Should your dog get away from you for any reason, you want to be able to call your dog’s name and have her return to you. ";
+                "Ensuring that your dog knows his name is not only a fun exercise – it is a great safety net. Should your dog get away from you for any reason, you want to be able to call your dog’s name and have him return to you. ";
         heading = "Listen";
-        ((TextView) findViewById(R.id.sub_activity_heading)).setText(heading + " " + currentPage + "/" + totalPages);
+        ((TextView) findViewById(R.id.sub_activity_heading)).setText(heading);
+        ((TextView) findViewById(R.id.sub_activity_page_number)).setText("Page: "+ currentPage + "/" + totalPages);
         ((TextView) findViewById(R.id.a_t_preparing)).setText(displayPoints[currentPage-1]);
         ((TextView) findViewById(R.id.a_t_preparing)).scrollTo(0,0);
     }
     private void prepareForFetch() {
+        ((ImageView) findViewById(R.id.image_preparing)).setImageResource(R.drawable.dog_command_image_fetch);
         displayPoints = new String[6];
         currentPage = 1;
         totalPages = 6;
@@ -241,9 +282,9 @@ public class Preparing extends AppCompatActivity {
                 "You can start off by giving him treats or praise for taking any interest in the ball, and slowly work your way up to having him run after and pick up the ball.";
         displayPoints[3] = "Call the Dog Back\n" +
                 "\n" +
-                "This step and the next are the most important parts of the game of fetch, and the place most people run into trouble. But if you can't get your dog to come back and drop the ball, you're not playing fetch, you're playing chase!\n" +
+                "This step and the next are the most important parts of the game of fetch, and the place most people run into trouble. If you can't get your dog to come back and drop the ball, you're not playing fetch, you're playing chase!\n" +
                 "\n" +
-                "The best way to get a dog to return to you with the ball is to make sure he has a strong understanding of the come command before you begin. When playing fetch, as soon as your dog picks up the ball, give the come command. Encourage your dog to come back to you by speaking in a happy voice, patting your legs, and giving him praise.\n" +
+                "The best way to make your dog return to you with the ball is to make sure he has a strong understanding of the come command before you begin. When playing fetch, as soon as your dog picks up the ball, give the come command. Encourage your dog to come back to you by speaking in a happy voice, patting your legs, and giving him praise.\n" +
                 "\n" +
                 "If a dog is having trouble with this step, you may need to shorten the distance you throw the ball. In some cases, this may mean to start with just a few feet. Gradually increase the distance you throw the ball. Your dog should be able to consistently bring the ball back to you before you move on to the next distance.";
         displayPoints[4] = "Use a Release Command\n" +
@@ -255,18 +296,20 @@ public class Preparing extends AppCompatActivity {
                 "Another option, instead of treats, is to use two balls. As soon as your dog returns to you with the first ball, show him another ball you're holding in your hand. Many dogs will drop the ball they have in order to go after the second ball. As soon as your dog drops the ball, throw the one in your hand for him to fetch. (Note: This doesn't always work. Some dogs refuse to let go of the ball they already have. In this case, the treat method above would probably work best.)";
         displayPoints[5] = "Never Play Chase\n" +
                 "\n" +
-                "Keep in mind when you're going through these steps that your dog is likely to be just as happy playing chase or keep away as he is playing fetch. Don't get sucked into a game of chase! If your dog runs off with the ball, turn your back to him and begin to walk away. Most dogs will run towards you. If your dog refuses to bring the ball back, end the game.\n" +
+                "Keep in mind when you're going through these steps your dog is likely to be just as happy playing chase or keep away as he is playing fetch. Don't get stuck into a game of chase! If your dog runs off with the ball, turn your back to him and begin to walk away. Most dogs will run towards you. If your dog refuses to bring the ball back, end the game.\n" +
                 "\n" +
                 "For dogs who persist in running away with the ball, try practicing with your dog on a leash. Throw the ball just a short distance, and then give him the come command and then just stand there and wait him out. Use treats and praise to coax him in the right direction.";
 
 
         heading = "Fetch";
-        ((TextView) findViewById(R.id.sub_activity_heading)).setText(heading + " " + currentPage + "/" + totalPages);
+        ((TextView) findViewById(R.id.sub_activity_heading)).setText(heading);
+        ((TextView) findViewById(R.id.sub_activity_page_number)).setText("Page: "+ currentPage + "/" + totalPages);
         ((TextView) findViewById(R.id.a_t_preparing)).setText(displayPoints[currentPage-1]);
         ((TextView) findViewById(R.id.a_t_preparing)).scrollTo(0,0);
     }
 
     private void prepareForRollOver() {
+        ((ImageView) findViewById(R.id.image_preparing)).setImageResource(R.drawable.dog_command_image_roll_over);
         displayPoints = new String[6];
         currentPage = 1;
         totalPages = 6;
@@ -283,9 +326,9 @@ public class Preparing extends AppCompatActivity {
                 "\n" +
                 "If your dog is making a lot of mistakes, such as jumping up or turning his head in the opposite direction, you may be moving ahead too quickly. Go back a step or two to when your dog was performing well, and start to slowly build him back up to a full roll over.\n" +
                 "\n" +
-                "Some dogs can be resistant to lying on their backs and showing their bellies. In this case, make sure your dog knows that training is just fun and games. If he enjoys belly rubs, scratch his belly, and click or praise and give him a treat every time he offers you his belly. Be sure to keep your voice light and positive.\n" +
+                "Some dogs can be resistant to lying on their backs and showing their bellies. In this case, make sure your dog knows that training is just fun and games. If he enjoys belly rubs, rub his belly, and click or praise and give him a treat every time he offers you his belly. Be sure to keep your voice light and positive.\n" +
                 "\n" +
-                "It's also important to keep training sessions short and upbeat. Training sessions that are too long tend to become frustrating for both you and your dog. Keep training to about 10 minutes each time, and try to end each session on a positive note.";
+                "It's also important to keep training sessions short and upbeat. Training sessions that are too long tend to become frustrating for both you and your dog. Keep training for about 10 minutes each time, and try to end each session on a positive note.";
         displayPoints[4] = "Add the Roll Over Command\n" +
                 "\n" +
                 "When teaching your dog to roll over, it's often easiest to add the command once your dog is consistently rolling all the way over. Once he's smoothly following the treat and rolling over each time, it's time to add the command. Hold the treat in front of him, give the command \"roll over,\" and lure him over with the treat. Practice this over several training sessions.";
@@ -295,12 +338,14 @@ public class Preparing extends AppCompatActivity {
                 "\n" +
                 "If your dog doesn't immediately respond to the command, you can phase out the treat more slowly. Start by giving your dog the command \"roll over,\" and use the treat to lure him part of the way over. Move the treat away from him once he is in motion. Slowly decrease how far you lure him with each training session. Most dogs catch on quickly, and will soon be dropping into a roll on your command.";
         heading = "Roll Over";
-        ((TextView) findViewById(R.id.sub_activity_heading)).setText(heading + " " + currentPage + "/" + totalPages);
+        ((TextView) findViewById(R.id.sub_activity_heading)).setText(heading);
+        ((TextView) findViewById(R.id.sub_activity_page_number)).setText("Page: "+ currentPage + "/" + totalPages);
         ((TextView) findViewById(R.id.a_t_preparing)).setText(displayPoints[currentPage-1]);
         ((TextView) findViewById(R.id.a_t_preparing)).scrollTo(0,0);
     }
 
     private void prepareForHeel() {
+        ((ImageView) findViewById(R.id.image_preparing)).setImageResource(R.drawable.dog_command_image_heel);
         displayPoints = new String[5];
         currentPage = 1;
         totalPages = 5;
@@ -328,13 +373,14 @@ public class Preparing extends AppCompatActivity {
                 "There may be times when you just cannot get your dog's attention. He might find what's going on around him more interesting than your treats or happy talk, and stopping and starting may not be enough to distract him from whatever is holding his attention. In this case, you can wait until he lets up a little on the leash, give him the command again, and turn and walk in the opposite direction. Your dog will have no choice but to follow. If he tries to step out in front of you, cut him off and keep walking. Your dog will soon learn to pay attention to you to figure out which way to go.";
 
         heading = "Heel";
-        ((TextView) findViewById(R.id.sub_activity_heading)).setText(heading + " " + currentPage + "/" + totalPages);
+        ((TextView) findViewById(R.id.sub_activity_heading)).setText(heading);
+        ((TextView) findViewById(R.id.sub_activity_page_number)).setText("Page: "+ currentPage + "/" + totalPages);
         ((TextView) findViewById(R.id.a_t_preparing)).setText(displayPoints[currentPage-1]);
         ((TextView) findViewById(R.id.a_t_preparing)).scrollTo(0,0);
     }
 
 
-    public void nextPage(View view) {
+   /*public void nextPage(View view) {
         (findViewById(R.id.nav_next)).getBackground().setAlpha(64);
         view.startAnimation(buttonClick);
         Vibrator v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
@@ -346,9 +392,9 @@ public class Preparing extends AppCompatActivity {
             ((TextView) findViewById(R.id.sub_activity_heading)).setText(heading + " " + currentPage + "/" + totalPages);
             handleNavigationButtons();
         }
-    }
+    }*/
 
-    public void prevPage(View view) {
+    /*public void prevPage(View view) {
         view.startAnimation(buttonClick);
         Vibrator v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
         v.vibrate(16);
@@ -359,33 +405,33 @@ public class Preparing extends AppCompatActivity {
             ((TextView) findViewById(R.id.sub_activity_heading)).setText(heading + " " + currentPage + "/" + totalPages);
             handleNavigationButtons();
         }
-    }
+    }*/
 
     public void handleNavigationButtons()
     {
         if(currentPage==totalPages)
         {
-            (findViewById(R.id.nav_next)).setEnabled(false);
+            /*(findViewById(R.id.nav_next)).setEnabled(false);
             (findViewById(R.id.nav_next)).getBackground().setAlpha(64);
             (findViewById(R.id.nav_prev)).setEnabled(true);
-            (findViewById(R.id.nav_prev)).getBackground().setAlpha(255);
+            (findViewById(R.id.nav_prev)).getBackground().setAlpha(255);*/
 
             Intent intent = new Intent(this, AdsActivity.class);
             startActivity(intent);
         }
         else if(currentPage==1)
         {
-            (findViewById(R.id.nav_prev)).setEnabled(false);
+            /*(findViewById(R.id.nav_prev)).setEnabled(false);
             (findViewById(R.id.nav_prev)).getBackground().setAlpha(64);
             (findViewById(R.id.nav_next)).setEnabled(true);
-            (findViewById(R.id.nav_next)).getBackground().setAlpha(255);
+            (findViewById(R.id.nav_next)).getBackground().setAlpha(255);*/
         }
         else
         {
-            (findViewById(R.id.nav_prev)).setEnabled(true);
+            /*(findViewById(R.id.nav_prev)).setEnabled(true);
             (findViewById(R.id.nav_prev)).getBackground().setAlpha(255);
             (findViewById(R.id.nav_next)).setEnabled(true);
-            (findViewById(R.id.nav_next)).getBackground().setAlpha(255);
+            (findViewById(R.id.nav_next)).getBackground().setAlpha(255);*/
         }
     }
 
@@ -402,5 +448,153 @@ public class Preparing extends AppCompatActivity {
             finish();
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    /*public boolean onTouch(MotionEvent e){
+        //this.mDetector.onTouchEvent(event);
+        //return super.onTouchEvent(event);
+        return false;
+    }*/
+
+    /*@Override
+    public boolean dispatchTouchEvent(MotionEvent ev){
+        super.dispatchTouchEvent(ev);
+        return mDetector.onTouchEvent(ev);
+    }*/
+
+
+    @Override
+    public boolean onDown(MotionEvent e) {
+        return false;
+    }
+
+    @Override
+    public void onShowPress(MotionEvent e) {
+
+    }
+
+    @Override
+    public boolean onSingleTapUp(MotionEvent e) {
+        return false;
+    }
+
+    @Override
+    public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
+        return false;
+    }
+
+    @Override
+    public void onLongPress(MotionEvent e) {}
+
+    @Override
+    public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
+        try {
+            if (Math.abs(e1.getY() - e2.getY()) > SWIPE_MAX_OFF_PATH){
+                return false;
+            }
+            // right to left swipe
+            if (e1.getX() - e2.getX() > SWIPE_MIN_DISTANCE
+                    && Math.abs(velocityX) > SWIPE_THRESHOLD_VELOCITY) {
+                onLeftSwipe();
+            }
+            // left to right swipe
+            else if (e2.getX() - e1.getX() > SWIPE_MIN_DISTANCE
+                    && Math.abs(velocityX) > SWIPE_THRESHOLD_VELOCITY) {
+                onRightSwipe();
+            }
+        } catch (Exception e) {
+
+        }
+        return false;
+    }
+
+    private void onLeftSwipe() {
+        final Context context = this;
+        if(currentPage<totalPages) {
+            Animation out = AnimationUtils.loadAnimation(this, android.R.anim.fade_out);
+            ((TextView) findViewById(R.id.a_t_preparing)).startAnimation(out);
+            out.setAnimationListener(new Animation.AnimationListener() {
+                @Override
+                public void onAnimationStart(Animation animation) {
+                    Vibrator v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+                    v.vibrate(16);
+                }
+
+                @Override
+                public void onAnimationEnd(Animation animation) {
+                    Animation in = AnimationUtils.loadAnimation(context, android.R.anim.fade_in);
+                    ((TextView) findViewById(R.id.a_t_preparing)).startAnimation(in);
+                    in.setAnimationListener(new Animation.AnimationListener() {
+                        @Override
+                        public void onAnimationStart(Animation animation) {
+                            ((TextView) findViewById(R.id.a_t_preparing)).setText(displayPoints[++currentPage - 1]);
+                            ((TextView) findViewById(R.id.a_t_preparing)).scrollTo(0, 0);
+                            ((TextView) findViewById(R.id.a_t_preparing)).scrollTo(0, 0);
+                            ((TextView) findViewById(R.id.sub_activity_heading)).setText(heading);
+                            ((TextView) findViewById(R.id.sub_activity_page_number)).setText("Page: "+ currentPage + "/" + totalPages);
+                            handleNavigationButtons();
+                        }
+
+                        @Override
+                        public void onAnimationEnd(Animation animation) {
+                        }
+
+                        @Override
+                        public void onAnimationRepeat(Animation animation) {
+                        }
+                    });
+                }
+
+                @Override
+                public void onAnimationRepeat(Animation animation) {
+                }
+            });
+        }
+        else
+        {
+            Toast.makeText(Preparing.this, "Swipe left to move to previous page", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void onRightSwipe() {
+        final Context context = this;
+        if(currentPage>1) {
+            Animation out = AnimationUtils.loadAnimation(this,android.R.anim.fade_out);
+            ((TextView) findViewById(R.id.a_t_preparing)).startAnimation(out);
+            out.setAnimationListener(new Animation.AnimationListener() {
+                @Override
+                public void onAnimationStart(Animation animation) {
+                    Vibrator v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+                    v.vibrate(16);
+                }
+
+                @Override
+                public void onAnimationEnd(Animation animation) {
+                    Animation in = AnimationUtils.loadAnimation(context,android.R.anim.fade_in);
+                    ((TextView) findViewById(R.id.a_t_preparing)).startAnimation(in);
+                    in.setAnimationListener(new Animation.AnimationListener() {
+                        @Override
+                        public void onAnimationStart(Animation animation) {
+                            ((TextView) findViewById(R.id.a_t_preparing)).setText(displayPoints[--currentPage-1]);
+                            ((TextView) findViewById(R.id.a_t_preparing)).scrollTo(0,0);
+                            ((TextView) findViewById(R.id.a_t_preparing)).scrollTo(0,0);
+                            ((TextView) findViewById(R.id.sub_activity_heading)).setText(heading);
+                            ((TextView) findViewById(R.id.sub_activity_page_number)).setText("Page: "+ currentPage + "/" + totalPages);
+                            handleNavigationButtons();
+                        }
+                        @Override
+                        public void onAnimationEnd(Animation animation) {}
+                        @Override
+                        public void onAnimationRepeat(Animation animation) {}
+                    });
+                }
+                @Override
+                public void onAnimationRepeat(Animation animation) {}
+            });
+        }
+        else
+        {
+            Toast.makeText(Preparing.this, "Swipe right to move to next page", Toast.LENGTH_SHORT).show();
+        }
     }
 }

@@ -19,8 +19,7 @@ public class AdsManager {
             interstitialAd.setAdUnitId("ca-app-pub-8416049748850189/2123937759");
         }
 
-        AdRequest adRequest = new AdRequest.Builder()
-                .addTestDevice(AdRequest.DEVICE_ID_EMULATOR).build();
+        AdRequest adRequest = new AdRequest.Builder().build();
 
         interstitialAd.loadAd(adRequest);
     }
