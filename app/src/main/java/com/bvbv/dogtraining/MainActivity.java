@@ -1,18 +1,23 @@
 package com.bvbv.dogtraining;
 
+import android.Manifest;
+import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.location.Location;
 import android.location.LocationManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Vibrator;
 import android.provider.Settings;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -31,21 +36,35 @@ import com.bvbv.weather.Weather;
 import com.bvbv.location.AsyncLocationAddressRetrieve;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
+import com.google.android.gms.appindexing.Action;
+import com.google.android.gms.appindexing.AppIndex;
+import com.google.android.gms.common.api.GoogleApiClient;
 
 public class MainActivity extends AppCompatActivity {
 
+    public static final int MY_PERMISSIONS_REQUEST_LOCATION = 99;
+    public boolean isPermissionGranted = false;
     boolean isWeatherProcessComplete = false;
+    /**
+     * ATTENTION: This was auto-generated to implement the App Indexing API.
+     * See https://g.co/AppIndexing/AndroidStudio for more information.
+     */
+    private GoogleApiClient client;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        System.out.println("On create called");
         setContentView(R.layout.activity_main);
         final Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         setActivityBackgroundColor(Color.WHITE);
-        if(!isWeatherProcessComplete && isNetworkAvailable())
+        if (!isWeatherProcessComplete && isNetworkAvailable())
             diplayWeatherInformation();
 
+        // ATTENTION: This was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
+        client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
     }
 
     private boolean isNetworkAvailable() {
@@ -54,8 +73,7 @@ public class MainActivity extends AppCompatActivity {
                 = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
         System.out.println("Result:-->" + (activeNetworkInfo != null && activeNetworkInfo.isConnected()));
-        if(!(activeNetworkInfo != null && activeNetworkInfo.isConnectedOrConnecting()))
-        {
+        if (!(activeNetworkInfo != null && activeNetworkInfo.isConnectedOrConnecting())) {
             System.out.println("Result inside:-->" + (activeNetworkInfo != null && activeNetworkInfo.isConnectedOrConnecting()));
             ((TextView) findViewById(R.id.t_temperature)).setText("No network access..");
             Toast.makeText(getApplicationContext(), "No network access..",
@@ -72,11 +90,11 @@ public class MainActivity extends AppCompatActivity {
                 temperature = temperature - 273.15f;
                 ((TextView) findViewById(R.id.t_temperature)).setText("" + weather.getCity() + " " + temperature + "°C" + "\nLooks like " + weather.getDescription() + "\nPlan your training!");
 
-                int id = getResources().getIdentifier(getApplicationContext().getPackageName() + ":drawable/" + "weather_" + weather.getIconCode() , null, null);
-                if(id==0)
-                    ((ImageView)findViewById(R.id.imageView1)).setImageDrawable(weather.getBitmapImage());
+                int id = getResources().getIdentifier(getApplicationContext().getPackageName() + ":drawable/" + "weather_" + weather.getIconCode(), null, null);
+                if (id == 0)
+                    ((ImageView) findViewById(R.id.imageView1)).setImageDrawable(weather.getBitmapImage());
                 else
-                  ((ImageView)findViewById(R.id.imageView1)).setImageResource(id);
+                    ((ImageView) findViewById(R.id.imageView1)).setImageResource(id);
                 isWeatherProcessComplete = true;
             }
         };
@@ -84,7 +102,7 @@ public class MainActivity extends AppCompatActivity {
         ILocationAddressPostExecute iLocationAddressPostExecute = new ILocationAddressPostExecute() {
             @Override
             public void doDelegate(String city) {
-                Object []object = new Object[2];
+                Object[] object = new Object[2];
                 object[0] = city;
                 System.out.println("The retrieved city from location is " + city);
                 object[1] = iWeatherPostExecute;
@@ -93,11 +111,11 @@ public class MainActivity extends AppCompatActivity {
         };
 
         double latitude = 0f;
-        double longitude  = 0f;
+        double longitude = 0f;
 
-        AppLocationService appLocationService = new AppLocationService(getApplicationContext());
+        final AppLocationService appLocationService = new AppLocationService(getApplicationContext());
         Location gpsLocation = appLocationService
-                .getLocation(LocationManager.NETWORK_PROVIDER);
+                .getLocation(LocationManager.NETWORK_PROVIDER, this, this);
         if (gpsLocation != null) {
             latitude = gpsLocation.getLatitude();
             longitude = gpsLocation.getLongitude();
@@ -108,9 +126,9 @@ public class MainActivity extends AppCompatActivity {
             params[3] = iLocationAddressPostExecute;
             new AsyncLocationAddressRetrieve().execute(params);
         } else {
-            ((TextView) findViewById(R.id.t_temperature)).setText("Unable to fetch weather..\nEnable location services?");
+            ((TextView) findViewById(R.id.t_temperature)).setText("Unable to fetch weather.\nLocation services off or\nlocation permission denied.");
             //Toast.makeText(getApplicationContext(), "Could not retrieve the location information!",
-                    //Toast.LENGTH_SHORT).show();
+            //Toast.LENGTH_SHORT).show();
             //showSettingsAlert();
             (findViewById(R.id.t_temperature)).setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -224,37 +242,36 @@ public class MainActivity extends AppCompatActivity {
         vibrateForPress();
         final Context context = view.getContext();
         new AlertDialog.Builder(context)
-        .setTitle("Dog Training")
-        .setMessage("We are pleased that you like this app. There will be more things coming soon." +
-                "Please support us by rating our app in the play store.")
-        .setPositiveButton("Later", new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int which) {
-                // do nothing
-            }
-        })
-        .setNegativeButton("Rate", new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int which) {
-                Uri uri = Uri.parse("market://details?id=" + context.getPackageName());
-                Intent goToMarket = new Intent(Intent.ACTION_VIEW, uri);
-                // To count with Play market backstack, After pressing back button,
-                // to taken back to our application, we need to add following flags to intent.
-                goToMarket.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY |
-                        Intent.FLAG_ACTIVITY_NEW_DOCUMENT |
-                        Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
-                try {
-                    startActivity(goToMarket);
-                } catch (ActivityNotFoundException e) {
-                    startActivity(new Intent(Intent.ACTION_VIEW,
-                            Uri.parse("http://play.google.com/store/apps/details?id=" + context.getPackageName())));
-                }
-            }
-        })
-        .setIcon(R.mipmap.ic_launcher)
-        .show();
+                .setTitle("Dog Training")
+                .setMessage("We are pleased that you like this app. There will be more things coming soon." +
+                        "Please support us by rating our app in the play store.")
+                .setPositiveButton("Later", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        // do nothing
+                    }
+                })
+                .setNegativeButton("Rate", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        Uri uri = Uri.parse("market://details?id=" + context.getPackageName());
+                        Intent goToMarket = new Intent(Intent.ACTION_VIEW, uri);
+                        // To count with Play market backstack, After pressing back button,
+                        // to taken back to our application, we need to add following flags to intent.
+                        goToMarket.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY |
+                                Intent.FLAG_ACTIVITY_NEW_DOCUMENT |
+                                Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
+                        try {
+                            startActivity(goToMarket);
+                        } catch (ActivityNotFoundException e) {
+                            startActivity(new Intent(Intent.ACTION_VIEW,
+                                    Uri.parse("http://play.google.com/store/apps/details?id=" + context.getPackageName())));
+                        }
+                    }
+                })
+                .setIcon(R.mipmap.ic_launcher)
+                .show();
     }
 
-    public void vibrateForPress()
-    {
+    public void vibrateForPress() {
         Vibrator v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
         v.vibrate(16);
     }
@@ -288,7 +305,7 @@ public class MainActivity extends AppCompatActivity {
                         Intent intent = new Intent(
                                 Settings.ACTION_LOCATION_SOURCE_SETTINGS);
                         MainActivity.this.startActivity(intent);
-                }
+                    }
                 });
         alertDialog.setNegativeButton("Cancel",
                 new DialogInterface.OnClickListener() {
@@ -300,16 +317,76 @@ public class MainActivity extends AppCompatActivity {
         alertDialog.show();
     }
 
+    public void setIsPermissionGranted(boolean val) {
+        this.isPermissionGranted = val;
+    }
+
     @Override
     public void onResume() {
         super.onResume();
-        if(!isWeatherProcessComplete) {
-            ((TextView)findViewById(R.id.t_temperature)).setText("Welcome....!");
-            if(isNetworkAvailable())
-            {
-                (findViewById(R.id.t_temperature)).setOnClickListener(null);
-                diplayWeatherInformation();
+
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                if (!isWeatherProcessComplete) {
+                    ((TextView) findViewById(R.id.t_temperature)).setText("Welcome....!");
+                    if (isNetworkAvailable()) {
+                        (findViewById(R.id.t_temperature)).setOnClickListener(null);
+                        diplayWeatherInformation();
+                    }
+                }
+            }
+        } else {
+            if (!isWeatherProcessComplete) {
+                ((TextView) findViewById(R.id.t_temperature)).setText("Welcome....!");
+                if (isNetworkAvailable()) {
+                    (findViewById(R.id.t_temperature)).setOnClickListener(null);
+                    diplayWeatherInformation();
+                }
             }
         }
+
+
+
     }
+
+    /*@Override
+    public void onStart() {
+        super.onStart();
+
+        // ATTENTION: This was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
+        client.connect();
+        Action viewAction = Action.newAction(
+                Action.TYPE_VIEW, // TODO: choose an action type.
+                "Main Page", // TODO: Define a title for the content shown.
+                // TODO: If you have web page content that matches this app activity's content,
+                // make sure this auto-generated web page URL is correct.
+                // Otherwise, set the URL to null.
+                Uri.parse("http://host/path"),
+                // TODO: Make sure this auto-generated app URL is correct.
+                Uri.parse("android-app://com.bvbv.dogtraining/http/host/path")
+        );
+        AppIndex.AppIndexApi.start(client, viewAction);
+    }*/
+
+    /*@Override
+    public void onStop() {
+        super.onStop();
+
+        // ATTENTION: This was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
+        Action viewAction = Action.newAction(
+                Action.TYPE_VIEW, // TODO: choose an action type.
+                "Main Page", // TODO: Define a title for the content shown.
+                // TODO: If you have web page content that matches this app activity's content,
+                // make sure this auto-generated web page URL is correct.
+                // Otherwise, set the URL to null.
+                Uri.parse("http://host/path"),
+                // TODO: Make sure this auto-generated app URL is correct.
+                Uri.parse("android-app://com.bvbv.dogtraining/http/host/path")
+        );
+        AppIndex.AppIndexApi.end(client, viewAction);
+        client.disconnect();
+    }*/
 }

@@ -31,7 +31,7 @@ public class AsyncLocationAddressRetrieve extends AsyncTask<Object, Void, Object
                 city = address.getLocality();
             }
         } catch (IOException e) {
-            System.out.print(e.getMessage());
+            System.out.print("Async Location Address Retrieve : " + e.getMessage());
         }
         Object object[] = new Object[2];
         object[0] = city;
